@@ -1,5 +1,7 @@
 package br.com.backproduto.backproduto.controle;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.backproduto.backproduto.modelo.ProdutoModelo;
 import br.com.backproduto.backproduto.servico.ProdutoServico;
@@ -30,8 +34,10 @@ public class ProdutoControle {
     private Mensagem mensagem;
 
     @PostMapping("/produto")
-    public ResponseEntity<?> cadastrarProduto(@RequestBody ProdutoModelo produtoModelo){
-        return produtoServico.cadastrarProduto(produtoModelo);
+    public ResponseEntity<?> cadastraProduto(@RequestBody ProdutoModelo produtoModelo,
+                                                 @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles) {
+        ProdutoModelo cadastraProduto = produtoServico.cadastrarProduto(produtoModelo, imageFiles);
+        return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
     }
 
     @GetMapping("/produto")
