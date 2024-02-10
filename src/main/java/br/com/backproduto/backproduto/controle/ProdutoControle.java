@@ -33,40 +33,38 @@ public class ProdutoControle {
     @Autowired
     private Mensagem mensagem;
 
+   @GetMapping("/produto")
+    public ResponseEntity<Iterable<ProdutoModelo>> listarTodosProdutos() {
+        Iterable<ProdutoModelo> produtos = produtoServico.listarTodosProdutos();
+        return new ResponseEntity<>(produtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/produto/{id}")
+    public ResponseEntity<ProdutoModelo> buscarProdutoPorId(@PathVariable Long codigo) {
+        Optional<ProdutoModelo> produtoOptional = produtoServico.buscarProdutoPorCodigo(codigo);
+        return new ResponseEntity<>(produtoOptional, HttpStatus.OK));
+    }
+
     @PostMapping("/produto")
-    public ResponseEntity<?> cadastraProduto(@RequestBody ProdutoModelo produtoModelo,
-                                                 @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles) {
-        ProdutoModelo cadastraProduto = produtoServico.cadastrarProduto(produtoModelo, imageFiles);
-        return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/produto")
-    public Iterable listarTodosProdutos(){
-        return produtoServico.listarTodosProdutos();
-    }
-    
-    @GetMapping("/produto/{codigo}")
-    public ResponseEntity<?> buscarProdutoPorCodigo(@PathVariable Long codigo) {
-        Optional<ProdutoModelo> produtoModeloOptional = produtoServico.buscarProdutoPorCodigo(codigo);
-
-        if (!produtoModeloOptional.isPresent()) {
-            Mensagem mensagem = new Mensagem();
-            mensagem.setMensagem("Código do produto não existe!");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mensagem);
+    public ResponseEntity<ProdutoModelo> cadastrarProduto(@RequestBody ProdutoModelo produtoModelo) {
+        try {
+            ProdutoModelo produtoModelo = produtoServico.cadastrarProduto(produtoModelo);
+            return new ResponseEntity<>(produtoModelo, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
-        return ResponseEntity.ok(produtoModeloOptional.get());
     }
 
-    @PutMapping("/produto")
-    public ResponseEntity<?> editarProduto(@RequestBody ProdutoModelo produtoModelo){
-        return produtoServico.editarProduto(produtoModelo);
+    @DeleteMapping("/produto/{id}")
+    public ResponseEntity<Void> removerProduto(@PathVariable Long codigo) {
+        Optional<ProdutoModelo> existeProduto = produtoServico.buscarProdutoPorCodigo(codigo);
+        if (existeProduto.isPresent()) {
+            produtoServico.removerProduto(codigo);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-    @DeleteMapping("/produto/{codigo}")
-    public ResponseEntity<?> removerProduto(@PathVariable Long codigo) {
-        return produtoServico.removerProduto(codigo);
-    }
-
 
 
     
